@@ -35,8 +35,11 @@ who trade, and an education video game in the making.
 
 ## Status
 
-Early concept stage. See [`docs/CONCEPT_SUMMARY.md`](docs/CONCEPT_SUMMARY.md)
-for the public concept overview.
+Active design stage: the game's scenario catalog, simulation design, curriculum,
+and community structure are being designed in depth. No playable build yet —
+when there is one, it will be announced here and nowhere sooner.
+See [`docs/CONCEPT_SUMMARY.md`](docs/CONCEPT_SUMMARY.md) for the public concept
+overview.
 
 ## License
 
