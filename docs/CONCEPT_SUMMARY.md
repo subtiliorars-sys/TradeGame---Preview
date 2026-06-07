@@ -31,7 +31,8 @@ An education video game — a trading-practice simulator:
   where grid strategies break; DCA/rebalancing sims for stocks; session-timing
   sims for forex.
 - **Risk-management drills** — position-sizing puzzles, drawdown survival
-  challenges, even a "blow up the account on purpose" teaching mode.
+  challenges, even a "blow up the account on purpose" teaching mode —
+  simulated portfolio only, so the lesson costs nothing real.
 - **Progression that rewards process** — XP comes from sizing correctly,
   honoring stops, and journaling — not from lucky PnL. Good process with a bad
   outcome is celebrated as a lesson, not hidden.
@@ -56,3 +57,9 @@ A Discord-centered, community-run organization:
 ## Status
 
 Early concept stage — community design and game design in progress.
+
+---
+
+*Nothing in this document constitutes financial advice. TradeGame is an
+educational organization. Trading involves risk of loss. Consult a licensed
+financial professional before trading with real money.*

@@ -28,6 +28,11 @@ who trade, and an education video game in the making.
   brokerage or exchange account.
 - ❌ **No lambo culture.** Losses are part of the curriculum; we journal them.
 
+> **Disclaimer:** Nothing on this page or anywhere in the TradeGame community
+> constitutes financial advice. TradeGame is an educational organization.
+> Trading involves risk of significant loss. Consult a licensed financial
+> professional before making any investment or trading decisions.
+
 ## Status
 
 Early concept stage. See [`docs/CONCEPT_SUMMARY.md`](docs/CONCEPT_SUMMARY.md)
