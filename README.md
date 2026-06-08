@@ -35,9 +35,11 @@ who trade, and an education video game in the making.
 
 ## Status
 
-Active design stage: the game's scenario catalog, simulation design, curriculum,
-and community structure are being designed in depth. No playable build yet —
-when there is one, it will be announced here and nowhere sooner.
+In active development: game design, scenario catalog, community structure, and
+curriculum are complete in design. The web-based trading-practice simulator is
+being built. No playable build yet — when there is one, it will be announced
+here.
+
 See [`docs/CONCEPT_SUMMARY.md`](docs/CONCEPT_SUMMARY.md) for the public concept
 overview.
 

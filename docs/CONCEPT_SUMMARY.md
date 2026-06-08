@@ -1,5 +1,7 @@
 # TradeGame — Concept Summary (public)
 
+**Education, not financial advice.** TradeGame is a practice-drill system that uses entirely fictional instruments and simulated markets. Nothing here is a signal, trade idea, or financial recommendation. Consult a licensed professional before any real trading.
+
 ## The idea
 
 Gamers already know how to get good at hard things: practice modes, replays,
@@ -22,19 +24,20 @@ across all three.
 
 ## The game
 
-An education video game — a trading-practice simulator:
+An education video game — a trading-practice simulator with entirely fictional
+instruments and simulated markets:
 
-- **Paper-trading sandboxes** per market. Simulated money only.
-- **Scenario replays** — step into historical market moments tick-by-tick,
-  make your decisions, then get the debrief on what actually happened and why.
+- **Paper-trading sandboxes** per market. Simulated money only. Entirely fictional instruments and price data.
+- **Scenario replays** — step into historical market-inspired moments tick-by-tick,
+  make your decisions, then get the debrief on trading process and risk lessons.
 - **Strategy sandboxes** — e.g. a visual crypto grid-bot builder that teaches
   where grid strategies break; DCA/rebalancing sims for stocks; session-timing
   sims for forex.
 - **Risk-management drills** — position-sizing puzzles, drawdown survival
   challenges, even a "blow up the account on purpose" teaching mode —
   simulated portfolio only, so the lesson costs nothing real.
-- **Progression that rewards process** — XP comes from sizing correctly,
-  honoring stops, and journaling — not from lucky PnL. Good process with a bad
+- **Progression that rewards process** — advancement comes from correct sizing,
+  honoring stops, and journaling — not from profitable outcomes. Good process with a bad
   outcome is celebrated as a lesson, not hidden.
 
 ## The community
