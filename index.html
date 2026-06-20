@@ -1,0 +1,168 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TradeGame — Learn to Trade Like a Gamer</title>
+  <meta name="description" content="A trading-practice simulator that teaches real trading skills through game mechanics: paper trading, scenario replays, and progression — zero real money on the line." />
+  <meta name="disclaimer" content="TradeGame is an educational organization. Nothing here is financial advice. Trading involves risk of loss." />
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      background: #0b0f14;
+      color: #d8dce4;
+      min-height: 100vh;
+      line-height: 1.6;
+    }
+    .container { max-width: 860px; margin: 0 auto; padding: 2rem 1.5rem; }
+    header { text-align: center; padding: 3rem 1rem 2rem; background: linear-gradient(180deg, #111820 0%, #0b0f14 100%); border-bottom: 1px solid #1e2430; }
+    .logo { font-size: 2.4rem; font-weight: 900; color: #ffffff; letter-spacing: -0.03em; }
+    .tagline { color: #7098b8; font-size: 1.1rem; margin-top: 0.5rem; font-style: italic; }
+    .hero { text-align: center; margin: 2.5rem 0; }
+    .hero h2 { font-size: 1.3rem; color: #98b8d8; margin-bottom: 0.5rem; }
+    .hero p { color: #98a4b8; max-width: 650px; margin: 0 auto 1.5rem; font-size: 1.05rem; }
+    .cta-group { display: flex; flex-wrap: wrap; gap: 0.75rem; justify-content: center; margin: 1.5rem 0; }
+    a.btn { display: inline-block; padding: 0.85rem 1.5rem; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 1rem; transition: transform 0.15s, box-shadow 0.15s; }
+    a.btn:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(0,0,0,0.4); }
+    .btn-primary { background: #3e9e5c; color: #fff; }
+    .btn-secondary { background: rgba(255,255,255,0.06); color: #c8d8e8; border: 1px solid #2a3a4a; }
+    .btn-warn { background: rgba(255,255,255,0.05); color: #8898a8; border: 1px dashed #3a4a5a; }
+    .pillars { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin: 2rem 0; }
+    .pillar { background: rgba(255,255,255,0.03); padding: 1.25rem; border-radius: 10px; border-top: 3px solid #3e9e5c; text-align: center; }
+    .pillar .icon { font-size: 2rem; display: block; margin-bottom: 0.5rem; }
+    .pillar h3 { color: #80c8a0; font-size: 1rem; margin-bottom: 0.3rem; }
+    .pillar p { font-size: 0.85rem; color: #7a8898; }
+    .features { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1.25rem; margin: 2rem 0; }
+    .feature { background: rgba(255,255,255,0.03); padding: 1.25rem; border-radius: 10px; border-left: 4px solid #3e9e5c; }
+    .feature h3 { font-size: 1rem; color: #80c8a0; margin-bottom: 0.4rem; }
+    .feature p { font-size: 0.9rem; color: #8898a8; }
+    .modes { background: rgba(20,30,40,0.5); padding: 1.5rem; border-radius: 10px; margin: 2rem 0; }
+    .modes h2 { color: #80c8a0; margin-bottom: 1rem; }
+    .mode-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 0.75rem; }
+    .mode { background: rgba(255,255,255,0.04); padding: 0.85rem; border-radius: 6px; font-size: 0.9rem; color: #90a0b0; }
+    .disclaimer-banner { background: rgba(255, 203, 100, 0.08); border: 1px solid rgba(255, 203, 100, 0.25); padding: 1rem 1.5rem; border-radius: 10px; margin: 2rem 0; }
+    .disclaimer-banner h2 { color: #f0c060; font-size: 1rem; margin-bottom: 0.4rem; }
+    .disclaimer-banner p { color: #c0a880; font-size: 0.9rem; }
+    .ladder { margin: 2rem 0; }
+    .ladder h2 { color: #80c8a0; margin-bottom: 1rem; }
+    .ladder-steps { display: flex; flex-wrap: wrap; gap: 0.75rem; }
+    .ladder-step { background: rgba(62,158,92,0.1); border: 1px solid rgba(62,158,92,0.3); padding: 0.75rem 1.25rem; border-radius: 6px; color: #a0d8b8; font-weight: 600; font-size: 0.9rem; }
+    .quote { border-left: 4px solid #3e9e5c; padding: 1rem 1.5rem; margin: 2rem 0; background: rgba(62,158,92,0.06); font-style: italic; color: #a0c8b0; }
+    footer { text-align: center; padding: 2rem 1rem; color: #445; font-size: 0.85rem; }
+    @media (max-width: 600px) {
+      .logo { font-size: 1.6rem; }
+      .cta-group { flex-direction: column; align-items: stretch; }
+      a.btn { text-align: center; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1 class="logo">TradeGame</h1>
+    <p class="tagline">Learn to trade the way gamers learn games: practice, replays, and ranked progression — with zero real money on the line.</p>
+  </header>
+
+  <main class="container">
+    <section class="hero">
+      <h2>🎮 Trading is a Game. Master It Like One.</h2>
+      <p>Paper-trading sandboxes, historical scenario replays, and a coaching ladder — all in entirely fictional simulated markets. No real money, no signals, no lambo culture. Just skill, process, and progression.</p>
+      <div class="cta-group">
+        <a class="btn btn-primary" href="play/index.html">▶ Enter The Simulator</a>
+        <a class="btn btn-secondary" href="https://github.com/subtiliorars-sys/TradeGame---Preview">⭐ Star on GitHub</a>
+        <span class="btn btn-warn">🚧 Demo Coming Soon</span>
+      </div>
+    </section>
+
+    <section class="pillars">
+      <div class="pillar">
+        <span class="icon">₿</span>
+        <h3>Crypto</h3>
+        <p>Spot, day trading, grid strategies, liquidity pools, AI × crypto</p>
+      </div>
+      <div class="pillar">
+        <span class="icon">📈</span>
+        <h3>Stocks</h3>
+        <p>Long-term investing, ETFs, swing trading, earnings seasons</p>
+      </div>
+      <div class="pillar">
+        <span class="icon">💱</span>
+        <h3>Forex</h3>
+        <p>Major pairs, trading sessions, risk management, leverage danger</p>
+      </div>
+    </section>
+
+    <div class="disclaimer-banner">
+      <h2>⚠️ Education, Not Financial Advice</h2>
+      <p>TradeGame uses entirely fictional instruments and simulated markets. This is an educational project. Nothing here constitutes a signal or trade recommendation. Always consult a licensed professional before trading with real money.</p>
+    </div>
+
+    <section class="features">
+      <div class="feature">
+        <h3>🎯 Scenario Replays</h3>
+        <p>Step inside famous market moments tick-by-tick, make your decisions, then get the debrief on trading process and risk lessons.</p>
+      </div>
+      <div class="feature">
+        <h3>🛠 Strategy Sandboxes</h3>
+        <p>Build a crypto grid-bot visually. Simulate DCA/rebalancing. See where grid strategies break — before real money is at stake.</p>
+      </div>
+      <div class="feature">
+        <h3>🛡 Risk-Management Drills</h3>
+        <p>Position-sizing puzzles, drawdown survival challenges, even a "blow up the account on purpose" teaching mode. Safe, simulated, real lessons.</p>
+      </div>
+      <div class="feature">
+        <h3>📊 Process-First Progression</h3>
+        <p>Advancement rewards correct sizing, honoring stops, and journaling — not profit. Good process with bad outcomes is celebrated as a lesson.</p>
+      </div>
+    </section>
+
+    <section class="modes">
+      <h2>Game Modes</h2>
+      <div class="mode-grid">
+        <div class="mode">📝 Paper-Trading Sandboxes</div>
+        <div class="mode">🎬 Historical Scenario Replays</div>
+        <div class="mode">🕹 Strategy Sandboxes (Grid-Bot Builder)</div>
+        <div class="mode">🛡 Risk-Management Drills</div>
+        <div class="mode">📓 Wins-AND-Losses Journal</div>
+        <div class="mode">🏆 Progression Ladder</div>
+      </div>
+    </section>
+
+    <section class="ladder">
+      <h2>🧗 Coaching Ladder (Earned, Not Bought)</h2>
+      <p style="color:#8898a8; margin-bottom:0.75rem;">Progress through the game to unlock coaching rights. Entry is earned through the ladder — no pay-to-coach.</p>
+      <div class="ladder-steps">
+        <span class="ladder-step">🌱 Learner</span>
+        <span class="ladder-step">🤝 Helper</span>
+        <span class="ladder-step">🎓 Coach</span>
+      </div>
+    </section>
+
+    <div class="quote">
+      "Gamers already know how to get good at hard things: practice modes, replays, drills, ranked ladders, coaching. Trading is a hard thing most people are taught badly — usually by someone selling them signals. TradeGame applies the gamer learning loop to trading instead."
+    </div>
+
+    <section style="margin:2rem 0;">
+      <h2 style="color:#80c8a0; margin-bottom:1rem;">🛡 Lines We Don't Cross</h2>
+      <ul style="color:#8898a8; padding-left:1.5rem; line-height:2;">
+        <li><strong>No financial advice.</strong> Nobody tells you what to buy or sell.</li>
+        <li><strong>No signal-selling, ever.</strong> Structurally impossible by design.</li>
+        <li><strong>No real money in the game.</strong> Simulation only, always.</li>
+        <li><strong>No gambling mechanics.</strong> No loot boxes, no wager loops.</li>
+      </ul>
+    </section>
+
+    <section style="text-align:center; margin:3rem 0;">
+      <p style="color:#778899; margin-bottom:1rem;">⭐ Star the repo to follow development</p>
+      <div class="cta-group" style="justify-content:center;">
+        <a class="btn btn-primary" href="https://github.com/subtiliorars-sys/TradeGame---Preview">View on GitHub</a>
+        <a class="btn btn-secondary" href="https://discord.gg/tradegame">Join Discord</a>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    © 2026 · TradeGame · Proprietary · In active development
+  </footer>
+</body>
+</html>
