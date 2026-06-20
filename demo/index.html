@@ -4,11 +4,21 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>TradeGame — Paper Trading Simulator</title>
+<meta name="description" content="Learn to trade like gamers learn games: practice, replays, and ranked progression with zero real money.">
+<meta property="og:title" content="TradeGame - Paper Trading Simulator">
+<meta property="og:description" content="Educational trading simulator with crypto, stocks, and forex. No real money, no signals, just learning.">
+<meta property="og:type" content="website">
+<meta property="og:image" content="https://subtiliorars-sys.github.io/TradeGame---Preview/demo/og-image.png">
 <style>
+  * { box-sizing: border-box; }
   body { font-family: system-ui, sans-serif; background: #0f172a; color: #e2e8f0; max-width: 1000px; margin: 0 auto; padding: 1rem; }
-  header { text-align: center; padding: 2rem 0; border-bottom: 1px solid #1e293b; margin-bottom: 2rem; }
-  h1 { color: #38bdf8; margin: 0; font-size: 2rem; }
+  header { text-align: center; padding: 2rem 0; border-bottom: 1px solid #1e293b; margin-bottom: 2rem; position: relative; }
+  h1 { color: #38bdf8; margin: 0; font-size: 2rem; animation: fadeIn 0.5s ease-in; }
   .tagline { color: #94a3b8; margin-top: 0.5rem; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes slideIn { from { opacity: 0; transform: translateX(-20px); } to { opacity: 1; transform: translateX(0); } }
+  @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); } }
+  @keyframes badgeUnlock { 0% { transform: scale(0) rotate(-180deg); opacity: 0; } 60% { transform: scale(1.2) rotate(10deg); } 100% { transform: scale(1) rotate(0); opacity: 1; } }
   .mode-tabs { display: flex; gap: 0.5rem; margin-bottom: 1.5rem; flex-wrap: wrap; }
   .tab { flex: 1; min-width: 150px; padding: 0.75rem; background: #1e293b; border: 2px solid transparent; border-radius: 8px; color: #94a3b8; cursor: pointer; text-align: center; font-weight: 600; transition: all 0.15s; }
   .tab:hover { background: #334155; }
@@ -56,18 +66,52 @@
   .metric-value { font-size: 1.2rem; font-weight: 700; color: #f1f5f9; }
   .tutorial-overlay { background: #0c1929; border: 2px solid #38bdf8; border-radius: 10px; padding: 1.5rem; margin-bottom: 1.5rem; }
   .tutorial-overlay h3 { margin-top: 0; color: #38bdf8; }
-  .tutorial-step { opacity: 0.6; padding: 0.25rem 0; }
+  .tutorial-step { opacity: 0.6; padding: 0.25rem 0; transition: all 0.3s; }
   .tutorial-step.done { opacity: 1; color: #10b981; }
-  .tutorial-step.current { opacity: 1; color: #f59e0b; font-weight: 600; }
+  .tutorial-step.current { opacity: 1; color: #f59e0b; font-weight: 600; animation: pulse 2s infinite; }
+  .badges-container { display: flex; gap: 0.5rem; flex-wrap: wrap; margin: 1rem 0; padding: 1rem; background: #0f172a; border-radius: 8px; }
+  .badge { display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.5rem 0.75rem; background: #1e293b; border-radius: 6px; font-size: 0.85rem; border: 2px solid transparent; transition: all 0.3s; }
+  .badge.unlocked { border-color: #f59e0b; animation: badgeUnlock 0.6s ease-out; }
+  .badge.locked { opacity: 0.4; }
+  .badge-icon { font-size: 1.2rem; }
+  .badge-name { font-weight: 600; }
+  .badge-desc { font-size: 0.75rem; color: #94a3b8; }
+  .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 0.75rem; margin: 1rem 0; }
+  .stat-card { background: #0f172a; padding: 1rem; border-radius: 8px; text-align: center; border-left: 3px solid #38bdf8; animation: slideIn 0.5s ease-out; }
+  .stat-value { font-size: 1.8rem; font-weight: 700; color: #38bdf8; }
+  .stat-label { font-size: 0.75rem; color: #94a3b8; text-transform: uppercase; margin-top: 0.25rem; }
+  .achievement-toast { position: fixed; top: 20px; right: 20px; background: linear-gradient(135deg, #f59e0b, #d97706); color: white; padding: 1rem 1.5rem; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.3); animation: slideIn 0.5s ease-out; z-index: 1000; max-width: 300px; }
+  .achievement-toast.hide { animation: slideOut 0.5s ease-out forwards; }
+  @keyframes slideOut { to { opacity: 0; transform: translateX(400px); } }
+  .share-buttons { display: flex; gap: 0.5rem; margin-top: 1rem; }
+  .share-btn { padding: 0.5rem 1rem; background: #334155; border: none; border-radius: 6px; color: #e2e8f0; cursor: pointer; font-size: 0.85rem; transition: all 0.2s; }
+  .share-btn:hover { background: #475569; transform: translateY(-2px); }
+  .leaderboard-entry { display: flex; justify-content: space-between; padding: 0.75rem; background: #0f172a; border-radius: 6px; margin-bottom: 0.5rem; border-left: 3px solid #38bdf8; }
+  .rank { font-weight: 700; color: #f59e0b; margin-right: 1rem; }
+  .progress-bar { width: 100%; height: 8px; background: #1e293b; border-radius: 4px; overflow: hidden; margin: 0.5rem 0; }
+  .progress-fill { height: 100%; background: linear-gradient(90deg, #38bdf8, #0ea5e9); transition: width 0.5s ease; }
+  .tooltip { position: relative; display: inline-block; cursor: help; }
+  .tooltip:hover::after { content: attr(data-tooltip); position: absolute; bottom: 125%; left: 50%; transform: translateX(-50%); padding: 0.5rem; background: #1e293b; border: 1px solid #334155; border-radius: 6px; white-space: nowrap; z-index: 100; font-size: 0.75rem; }
   footer { text-align: center; padding: 2rem 0; color: #64748b; font-size: 0.8rem; border-top: 1px solid #1e293b; margin-top: 2rem; }
-  @media (max-width: 700px) { .grid { grid-template-columns: 1fr; } }
+  @media (max-width: 700px) { .grid { grid-template-columns: 1fr; } .achievement-toast { right: 10px; left: 10px; max-width: none; } }
 </style>
 </head>
 <body>
 <header>
   <h1>📈 TradeGame</h1>
   <p class="tagline">Paper trading simulator — practice, replay, learn. Zero real money.</p>
+  <div class="share-buttons">
+    <button class="share-btn" onclick="shareProgress()">📤 Share Progress</button>
+    <button class="share-btn" onclick="exportJournal()">📥 Export Journal</button>
+    <button class="share-btn" onclick="viewStats()">📊 View Stats</button>
+  </div>
 </header>
+
+<div id="achievement-toast" class="achievement-toast" style="display:none;">
+  <div style="font-size:1.5rem; margin-bottom:0.5rem;">🏆</div>
+  <div style="font-weight:700; margin-bottom:0.25rem;" id="toast-title">Achievement Unlocked!</div>
+  <div style="font-size:0.85rem; opacity:0.9;" id="toast-desc">Badge description</div>
+</div>
 
 <div class="tutorial-overlay" id="tutorial">
   <h3>🎓 Quick Tutorial</h3>
@@ -83,13 +127,42 @@
 <div class="metric"><span class="metric-label">Portfolio Value</span><div class="metric-value" id="portfolio-value">$10,000.00</div></div>
 <div class="metric"><span class="metric-label">Day</span><div class="metric-value" id="day">1</div></div>
 <div class="metric"><span class="metric-label">P&L</span><div class="metric-value" id="total-pnl" style="color:#94a3b8;">$0.00</div></div>
-<div style="margin: 0.75rem 0;"><button onclick="advanceDay()">⏭ Advance Day</button> <button onclick="resetGame()" style="background:#475569;">🔄 Reset</button> <button onclick="toggleTeachMode()" style="background:#475569;">🎓 Teach: $1,000 Mode</button></div>
+<div style="margin: 0.75rem 0;">
+  <button onclick="advanceDay()">⏭ Advance Day</button>
+  <button onclick="resetGame()" style="background:#475569;">🔄 Reset</button>
+  <button onclick="toggleTeachMode()" style="background:#475569;">🎓 Teach: $1,000 Mode</button>
+  <button onclick="toggleBadges()" style="background:#f59e0b;">🏆 Badges (<span id="badge-count">0</span>)</button>
+</div>
+
+<div id="badges-panel" class="panel" style="display:none;">
+  <h3 style="margin-top:0;">🏆 Achievements & Badges</h3>
+  <div class="badges-container" id="badges-list"></div>
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-value" id="stat-trades">0</div>
+      <div class="stat-label">Total Trades</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value" id="stat-winrate">0%</div>
+      <div class="stat-label">Win Rate</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value" id="stat-best">$0</div>
+      <div class="stat-label">Best Trade</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value" id="stat-streak">0</div>
+      <div class="stat-label">Current Streak</div>
+    </div>
+  </div>
+</div>
 
 <div class="mode-tabs">
   <div class="tab active" onclick="switchTab('trade', this)">💱 Trade</div>
   <div class="tab" onclick="switchTab('scenarios', this)">📖 Scenarios</div>
   <div class="tab" onclick="switchTab('portfolio', this)">📊 Portfolio</div>
   <div class="tab" onclick="switchTab('journal', this)">📝 Journal</div>
+  <div class="tab" onclick="switchTab('leaderboard', this)">🏅 Leaderboard</div>
 </div>
 
 <div class="panel active" id="panel-trade">
@@ -144,14 +217,65 @@
 
 <div class="panel" id="panel-journal">
   <h3 style="margin-top:0;">Trading Journal</h3>
-  <textarea id="journal-entry" placeholder="What did you learn today? What's your plan?" style="width:100%; min-height:120px; background:#0f172a; border:1px solid #334155; border-radius:6px; color:#e2e8f0; padding:0.75rem; font-family:inherit; resize:vertical;"></textarea>
-  <div style="margin-top:0.75rem;"><button onclick="saveJournal()">💾 Save Journal Entry</button></div>
+  <p style="color:#94a3b8; font-size:0.85rem; margin-bottom:1rem;">📝 Document your trades, strategies, and lessons learned. Good traders journal everything!</p>
+  <textarea id="journal-entry" placeholder="What did you learn today? What's your plan? What emotions did you feel?" style="width:100%; min-height:120px; background:#0f172a; border:1px solid #334155; border-radius:6px; color:#e2e8f0; padding:0.75rem; font-family:inherit; resize:vertical;"></textarea>
+  <div style="margin-top:0.75rem;">
+    <button onclick="saveJournal()">💾 Save Journal Entry</button>
+    <button onclick="addJournalTemplate('win')" style="background:#10b981;">✅ Win Template</button>
+    <button onclick="addJournalTemplate('loss')" style="background:#ef4444;">❌ Loss Template</button>
+  </div>
   <div class="log" id="journal-entries" style="margin-top:1rem;"></div>
+</div>
+
+<div class="panel" id="panel-leaderboard">
+  <h3 style="margin-top:0;">🏅 Community Leaderboard</h3>
+  <p style="color:#94a3b8; font-size:0.85rem; margin-bottom:1rem;">Top traders by process quality, not just profit. Good risk management = higher rank!</p>
+  <div id="leaderboard-list"></div>
+  <div style="margin-top:1.5rem; padding:1rem; background:#0f172a; border-radius:8px; border-left:3px solid #38bdf8;">
+    <strong>Your Rank:</strong> <span id="user-rank">#--</span><br>
+    <strong>Process Score:</strong> <span id="user-score">0</span> / 1000<br>
+    <div class="progress-bar"><div class="progress-fill" id="score-progress" style="width:0%"></div></div>
+    <small style="color:#94a3b8;">Score based on: journaling, SL/TP usage, win rate, risk management</small>
+  </div>
 </div>
 
 <footer>
   TradeGame is education only, not financial advice. No real money. Privacy-safe (local storage only). © 2026 JimmyTheHat
 </footer>
+
+const BADGES = [
+  { id: 'first-trade', name: 'First Trade', desc: 'Complete your first trade', icon: '🎯', condition: () => state.progression.totalTrades >= 1 },
+  { id: 'five-trades', name: '5 Trades', desc: 'Execute 5 trades', icon: '📈', condition: () => state.progression.totalTrades >= 5 },
+  { id: 'ten-trades', name: '10 Trades', desc: 'Execute 10 trades', icon: '💹', condition: () => state.progression.totalTrades >= 10 },
+  { id: 'active-trader', name: 'Active Trader', desc: 'Execute 25 trades', icon: '🔥', condition: () => state.progression.totalTrades >= 25 },
+  { id: 'day-trader', name: 'Day Trader', desc: 'Execute 50 trades', icon: '⚡', condition: () => state.progression.totalTrades >= 50 },
+  { id: 'centurion', name: 'Centurion', desc: 'Execute 100 trades', icon: '👑', condition: () => state.progression.totalTrades >= 100 },
+  { id: 'risk-manager', name: 'Risk Manager', desc: 'Use SL/TP on 10 trades', icon: '🛡️', condition: () => state.progression.slUsageCount >= 10 },
+  { id: 'journaler', name: 'Journaler', desc: 'Write 5 journal entries', icon: '📝', condition: () => state.journalEntries.length >= 5 },
+  { id: 'scenario-explorer', name: 'Scenario Explorer', desc: 'Try 3 different scenarios', icon: '🗺️', condition: () => state.progression.scenariosCompleted.length >= 3 },
+  { id: 'survivor', name: 'Survivor', desc: 'Survive 30 days', icon: '🏆', condition: () => state.day >= 30 },
+  { id: 'profitable', name: 'Profitable', desc: 'Reach $12,000 portfolio value', icon: '💰', condition: () => calculatePortfolioValue() >= 12000 },
+  { id: 'disciplined', name: 'Disciplined', desc: 'Never risk more than 5% per trade (10 trades)', icon: '🎓', condition: () => state.progression.disciplinedTrades >= 10 },
+  { id: 'multi-market', name: 'Multi-Market', desc: 'Trade in all 3 markets', icon: '🌍', condition: () => {
+    const markets = new Set(Object.values(state.positions).map(p => p.market));
+    return markets.size >= 3 || (state.progression.marketsTraded && state.progression.marketsTraded.size >= 3);
+  }},
+  { id: 'comeback-kid', name: 'Comeback Kid', desc: 'Recover from 20% drawdown', icon: '💪', condition: () => state.progression.comebackAchieved },
+  { id: 'streak-master', name: 'Streak Master', desc: '5 winning trades in a row', icon: '🔥', condition: () => state.progression.winStreak >= 5 },
+];
+
+const LEADERBOARD_DATA = [
+  { name: 'TraderPro', score: 850, rank: 1, trades: 127, winRate: 68 },
+  { name: 'RiskMaster', score: 820, rank: 2, trades: 95, winRate: 71 },
+  { name: 'JournalKing', score: 790, rank: 3, trades: 143, winRate: 62 },
+  { name: 'PatientOne', score: 765, rank: 4, trades: 78, winRate: 74 },
+  { name: 'ScenarioAce', score: 740, rank: 5, trades: 112, winRate: 65 },
+  { name: 'DisciplinedTrader', score: 715, rank: 6, trades: 89, winRate: 69 },
+  { name: 'ProcessFirst', score: 690, rank: 7, trades: 134, winRate: 58 },
+  { name: 'SteadyEddie', score: 670, rank: 8, trades: 67, winRate: 72 },
+  { name: 'LearnerMode', score: 645, rank: 9, trades: 156, winRate: 55 },
+  { name: 'RookieRising', score: 620, rank: 10, trades: 45, winRate: 67 },
+];
 
 <script>
 const SECURITIES = {
@@ -204,12 +328,22 @@ let state = {
   teachMode: false,
   progression: {
     streak: 0,
+    winStreak: 0,
     lastDay: 0,
     badges: [],
     totalTrades: 0,
+    winningTrades: 0,
+    losingTrades: 0,
     slHitCount: 0,
     tpHitCount: 0,
+    slUsageCount: 0,
     scenariosCompleted: [],
+    bestTrade: 0,
+    worstTrade: 0,
+    marketsTraded: new Set(),
+    disciplinedTrades: 0,
+    comebackAchieved: false,
+    lowestBalance: 10000,
   },
 };
 
@@ -319,10 +453,18 @@ function buy() {
   addLog(`Bought ${amount} ${symbol} @ $${formatPrice(price, market)} = $${formatPrice(cost, market)}`, 'buy');
   document.getElementById('buy-symbol').value = '';
   document.getElementById('buy-amount').value = '';
-  if (state.progression) state.progression.totalTrades++;
+  if (state.progression) {
+    state.progression.totalTrades++;
+    if (pos.slPercent || pos.tpPercent) state.progression.slUsageCount++;
+    if (!state.progression.marketsTraded) state.progression.marketsTraded = new Set();
+    state.progression.marketsTraded.add(market);
+    const riskPct = (cost * (slVal || 0) / 100) / calculatePortfolioValue() * 100;
+    if (riskPct <= 5 && slVal > 0) state.progression.disciplinedTrades++;
+  }
   checkBadges();
   saveState();
   render();
+  updateTutorial();
 }
 
 function sell() {
@@ -346,10 +488,29 @@ function sell() {
   addLog(`Sold ${amount} ${symbol} @ $${formatPrice(price, market)} | P&L: ${pnl}`, 'sell');
   document.getElementById('sell-symbol').value = '';
   document.getElementById('sell-amount').value = '';
-  if (state.progression) state.progression.totalTrades++;
+  if (state.progression) {
+    state.progression.totalTrades++;
+    if (profit > 0) {
+      state.progression.winningTrades++;
+      state.progression.winStreak++;
+      if (profit > state.progression.bestTrade) state.progression.bestTrade = profit;
+    } else {
+      state.progression.losingTrades++;
+      state.progression.winStreak = 0;
+      if (profit < state.progression.worstTrade) state.progression.worstTrade = profit;
+    }
+    const currentValue = calculatePortfolioValue();
+    if (currentValue < state.progression.lowestBalance) {
+      state.progression.lowestBalance = currentValue;
+    }
+    if (state.progression.lowestBalance < 8000 && currentValue >= 10000) {
+      state.progression.comebackAchieved = true;
+    }
+  }
   checkBadges();
   saveState();
   render();
+  updateTutorial();
 }
 
 function formatPrice(n, market = 'stocks') {
@@ -492,13 +653,18 @@ function loadScenario() {
   else initPrices();
 }
 
-function updatePortfolioValue() {
+function calculatePortfolioValue() {
   let equity = state.cash;
   for (const [sym, pos] of Object.entries(state.positions)) {
     const market = pos.market || state.currentMarket;
     const price = state.prices[market]?.[sym] || SECURITIES[market]?.find(s => s.symbol === sym)?.basePrice || pos.avgPrice;
     equity += price * pos.qty;
   }
+  return equity;
+}
+
+function updatePortfolioValue() {
+  const equity = calculatePortfolioValue();
   document.getElementById('portfolio-value').textContent = `$${equity.toFixed(2)}`;
 }
 
@@ -641,13 +807,150 @@ function updateRiskCalc() {
 function checkBadges() {
   if (!state.progression) return;
   const b = state.progression.badges;
-  const add = (id) => { if (!b.includes(id)) { b.push(id); addLog(`🏅 Badge unlocked: ${id}`, 'info'); } };
-  if (state.progression.totalTrades >= 1) add('First Trade');
-  if (state.progression.totalTrades >= 5) add('5 Trades');
-  if (state.progression.totalTrades >= 10) add('10 Trades');
-  if (state.progression.totalTrades >= 25) add('Active Trader');
-  if (state.progression.totalTrades >= 50) add('Day Trader');
-  if (state.progression.totalTrades >= 100) add('Centurion');
+  for (const badge of BADGES) {
+    if (!b.includes(badge.id) && badge.condition()) {
+      b.push(badge.id);
+      showAchievementToast(badge.name, badge.desc, badge.icon);
+      addLog(`🏅 Badge unlocked: ${badge.name}`, 'info');
+    }
+  }
+  updateBadgeCount();
+}
+
+function showAchievementToast(title, desc, icon) {
+  const toast = document.getElementById('achievement-toast');
+  document.getElementById('toast-title').textContent = title;
+  document.getElementById('toast-desc').textContent = desc;
+  toast.style.display = 'block';
+  toast.classList.remove('hide');
+  setTimeout(() => {
+    toast.classList.add('hide');
+    setTimeout(() => { toast.style.display = 'none'; }, 500);
+  }, 4000);
+}
+
+function updateBadgeCount() {
+  const count = state.progression?.badges?.length || 0;
+  document.getElementById('badge-count').textContent = count;
+}
+
+function toggleBadges() {
+  const panel = document.getElementById('badges-panel');
+  panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+  if (panel.style.display === 'block') renderBadges();
+}
+
+function renderBadges() {
+  const container = document.getElementById('badges-list');
+  container.innerHTML = '';
+  for (const badge of BADGES) {
+    const unlocked = state.progression.badges.includes(badge.id);
+    const cls = unlocked ? 'unlocked' : 'locked';
+    container.innerHTML += `
+      <div class="badge ${cls}" title="${badge.desc}">
+        <span class="badge-icon">${badge.icon}</span>
+        <div>
+          <div class="badge-name">${badge.name}</div>
+          <div class="badge-desc">${badge.desc}</div>
+        </div>
+      </div>`;
+  }
+  
+  const totalTrades = state.progression.totalTrades || 0;
+  const winRate = totalTrades > 0 ? ((state.progression.winningTrades || 0) / totalTrades * 100).toFixed(1) : 0;
+  const bestTrade = state.progression.bestTrade || 0;
+  const streak = state.progression.winStreak || 0;
+  
+  document.getElementById('stat-trades').textContent = totalTrades;
+  document.getElementById('stat-winrate').textContent = `${winRate}%`;
+  document.getElementById('stat-best').textContent = `$${bestTrade.toFixed(2)}`;
+  document.getElementById('stat-streak').textContent = streak;
+}
+
+function shareProgress() {
+  const portfolio = calculatePortfolioValue();
+  const pnl = portfolio - 10000;
+  const pnlPct = ((pnl / 10000) * 100).toFixed(1);
+  const badges = state.progression.badges.length;
+  const trades = state.progression.totalTrades;
+  const text = `📈 TradeGame Progress:\n💰 Portfolio: $${portfolio.toFixed(2)} (${pnlPct >= 0 ? '+' : ''}${pnlPct}%)\n🏆 Badges: ${badges}/${BADGES.length}\n📊 Trades: ${trades}\n\nPlay free: https://subtiliorars-sys.github.io/TradeGame---Preview/`;
+  
+  if (navigator.share) {
+    navigator.share({ title: 'TradeGame Progress', text });
+  } else {
+    navigator.clipboard.writeText(text);
+    alert('Progress copied to clipboard! Share it anywhere.');
+  }
+}
+
+function exportJournal() {
+  if (state.journalEntries.length === 0) {
+    alert('No journal entries to export yet. Start journaling!');
+    return;
+  }
+  const text = state.journalEntries.map(e => `Day ${e.day}:\n${e.text}\n\n`).join('---\n\n');
+  const blob = new Blob([text], { type: 'text/plain' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `tradegame-journal-${new Date().toISOString().split('T')[0]}.txt`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function viewStats() {
+  toggleBadges();
+}
+
+function addJournalTemplate(type) {
+  const textarea = document.getElementById('journal-entry');
+  if (type === 'win') {
+    textarea.value = `✅ Winning Trade Analysis:\n\nWhat went right:\n- \n\nWhat I learned:\n- \n\nNext time I will:\n- `;
+  } else {
+    textarea.value = `❌ Losing Trade Analysis:\n\nWhat went wrong:\n- \n\nMistakes made:\n- \n\nLesson learned:\n- \n\nHow to avoid next time:\n- `;
+  }
+  textarea.focus();
+}
+
+function renderLeaderboard() {
+  const container = document.getElementById('leaderboard-list');
+  container.innerHTML = '';
+  for (const entry of LEADERBOARD_DATA) {
+    const medal = entry.rank === 1 ? '🥇' : entry.rank === 2 ? '🥈' : entry.rank === 3 ? '🥉' : '';
+    container.innerHTML += `
+      <div class="leaderboard-entry">
+        <div>
+          <span class="rank">${medal} #${entry.rank}</span>
+          <strong>${entry.name}</strong>
+          <div style="font-size:0.75rem; color:#94a3b8; margin-top:0.25rem;">
+            ${entry.trades} trades · ${entry.winRate}% win rate
+          </div>
+        </div>
+        <div style="text-align:right;">
+          <div style="font-size:1.2rem; font-weight:700; color:#38bdf8;">${entry.score}</div>
+          <div style="font-size:0.75rem; color:#94a3b8;">process score</div>
+        </div>
+      </div>`;
+  }
+  
+  const userScore = calculateUserScore();
+  document.getElementById('user-score').textContent = userScore;
+  document.getElementById('score-progress').style.width = `${(userScore / 1000) * 100}%`;
+  
+  const userRank = LEADERBOARD_DATA.filter(e => e.score > userScore).length + 1;
+  document.getElementById('user-rank').textContent = `#${userRank}`;
+}
+
+function calculateUserScore() {
+  let score = 0;
+  score += Math.min(state.journalEntries.length * 20, 200);
+  score += Math.min((state.progression.slUsageCount || 0) * 15, 150);
+  const totalTrades = state.progression.totalTrades || 0;
+  const winRate = totalTrades > 0 ? ((state.progression.winningTrades || 0) / totalTrades) : 0;
+  score += Math.floor(winRate * 300);
+  score += Math.min(state.progression.badges.length * 25, 250);
+  score += Math.min((state.progression.disciplinedTrades || 0) * 10, 100);
+  return Math.min(score, 1000);
 }
 
 ['buy-symbol','buy-amount','buy-sl','buy-tp','market-select'].forEach(id => {
@@ -657,9 +960,15 @@ function checkBadges() {
 
 function init() {
   loadState();
+  if (!state.progression.marketsTraded) state.progression.marketsTraded = new Set();
+  if (typeof state.progression.marketsTraded === 'object' && !state.progression.marketsTraded.add) {
+    state.progression.marketsTraded = new Set(state.progression.marketsTraded);
+  }
   if (Object.keys(state.prices).length === 0) initPrices();
   render();
   updateRiskCalc();
+  updateBadgeCount();
+  renderLeaderboard();
 }
 
 init();
