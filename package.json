@@ -1,0 +1,10 @@
+{
+  "name": "tradegame-demo",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "echo 'Open demo/index.html in browser'",
+    "test": "node scripts/verify.js",
+    "deploy": "echo 'Push to main to trigger GitHub Pages deployment'"
+  }
+}

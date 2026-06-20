@@ -35,10 +35,19 @@ who trade, and an education video game in the making.
 
 ## Status
 
-In active development: game design, scenario catalog, community structure, and
-curriculum are complete in design. The web-based trading-practice simulator is
-being built. No playable build yet — when there is one, it will be announced
-here.
+✅ **Playable demo live!** Try it now at **[demo/index.html](demo/index.html)** —
+no account, no install, runs in your browser. Paper trading for crypto, stocks,
+and forex with educational scenarios.
+
+### Latest Features (2026-06-20)
+- 🛑 Stop-loss / Take-profit automation on every position
+- ⚠️ Live risk calculator showing max loss before entering trades
+- 🎓 Teaching Mode ($1,000) for learning strict risk limits
+- 📚 6-step interactive tutorial tracking your progress
+- 📊 Real-time P&L dashboard with portfolio tracking
+
+In active development: community structure, coaching ladder, and curriculum are
+complete in design. The web-based simulator is functional and ready for testing.
 
 See [`docs/CONCEPT_SUMMARY.md`](docs/CONCEPT_SUMMARY.md) for the public concept
 overview.

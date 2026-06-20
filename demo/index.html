@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TradeGame — Paper Trading Simulator</title>
+<style>
+  body { font-family: system-ui, sans-serif; background: #0f172a; color: #e2e8f0; max-width: 1000px; margin: 0 auto; padding: 1rem; }
+  header { text-align: center; padding: 2rem 0; border-bottom: 1px solid #1e293b; margin-bottom: 2rem; }
+  h1 { color: #38bdf8; margin: 0; font-size: 2rem; }
+  .tagline { color: #94a3b8; margin-top: 0.5rem; }
+  .mode-tabs { display: flex; gap: 0.5rem; margin-bottom: 1.5rem; flex-wrap: wrap; }
+  .tab { flex: 1; min-width: 150px; padding: 0.75rem; background: #1e293b; border: 2px solid transparent; border-radius: 8px; color: #94a3b8; cursor: pointer; text-align: center; font-weight: 600; transition: all 0.15s; }
+  .tab:hover { background: #334155; }
+  .tab.active { border-color: #38bdf8; color: #38bdf8; background: #0c1929; }
+  .panel { display: none; background: #1e293b; border-radius: 10px; padding: 1.5rem; margin-bottom: 1.5rem; }
+  .panel.active { display: block; }
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+  .portfolio { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 0.75rem; }
+  .stock-card { background: #0f172a; padding: 1rem; border-radius: 8px; border-left: 3px solid #38bdf8; }
+  .stock-card.crypto { border-left-color: #f59e0b; }
+  .stock-card.forex { border-left-color: #10b981; }
+  .card-title { font-size: 0.85rem; color: #94a3b8; margin-bottom: 0.25rem; }
+  .card-price { font-size: 1.4rem; font-weight: 700; color: #f1f5f9; }
+  .card-change { font-size: 0.85rem; margin-top: 0.25rem; }
+  .up { color: #10b981; }
+  .down { color: #ef4444; }
+  button { background: #38bdf8; color: #0f172a; border: none; padding: 0.65rem 1.1rem; border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 0.9rem; }
+  button:hover { background: #7dd3fc; }
+  button.sell { background: #ef4444; color: white; }
+  button.sell:hover { background: #f87171; }
+  .balance { font-size: 1.1rem; padding: 0.5rem 1rem; background: #0f172a; border-radius: 6px; display: inline-block; margin-bottom: 1rem; }
+  label { display: block; font-size: 0.85rem; color: #94a3b8; margin-bottom: 0.25rem; }
+  input, select { width: 100%; padding: 0.5rem; background: #0f172a; border: 1px solid #334155; border-radius: 6px; color: #e2e8f0; margin-bottom: 1rem; }
+  .positions { margin-top: 1rem; }
+  .position { background: #0f172a; padding: 0.75rem; border-radius: 6px; margin-bottom: 0.5rem; display: flex; justify-content: space-between; align-items: center; }
+  .position-info { flex: 1; }
+  .pos-symbol { font-weight: 700; color: #f1f5f9; }
+  .pos-detail { font-size: 0.8rem; color: #94a3b8; }
+  .pos-pnl { font-weight: 700; margin-left: 1rem; }
+  .chart-area { background: #0f172a; border-radius: 8px; padding: 1rem; height: 200px; margin-top: 1rem; position: relative; overflow: hidden; }
+  .bar { position: absolute; bottom: 0; width: 100%; transition: height 0.5s ease; }
+  .scenario-card { background: #0f172a; padding: 1rem; border-radius: 8px; margin-bottom: 0.75rem; cursor: pointer; border: 2px solid transparent; }
+  .scenario-card:hover { border-color: #334155; }
+  .scenario-card.selected { border-color: #38bdf8; }
+  .scenario-title { font-weight: 700; color: #f1f5f9; }
+  .scenario-desc { font-size: 0.85rem; color: #94a3b8; margin-top: 0.25rem; }
+  .scenario-market { font-size: 0.75rem; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em; margin-top: 0.5rem; }
+  .log { background: #0f172a; padding: 0.75rem; border-radius: 6px; font-family: monospace; font-size: 0.85rem; max-height: 200px; overflow-y: auto; }
+  .log-entry { padding: 0.25rem 0; border-bottom: 1px solid #1e293b; }
+  .log-entry.buy { color: #10b981; }
+  .log-entry.sell { color: #ef4444; }
+  .log-entry.info { color: #38bdf8; }
+  .metric { display: inline-block; margin-right: 1.5rem; margin-bottom: 0.5rem; }
+  .metric-label { font-size: 0.75rem; color: #64748b; text-transform: uppercase; }
+  .metric-value { font-size: 1.2rem; font-weight: 700; color: #f1f5f9; }
+  .tutorial-overlay { background: #0c1929; border: 2px solid #38bdf8; border-radius: 10px; padding: 1.5rem; margin-bottom: 1.5rem; }
+  .tutorial-overlay h3 { margin-top: 0; color: #38bdf8; }
+  .tutorial-step { opacity: 0.6; padding: 0.25rem 0; }
+  .tutorial-step.done { opacity: 1; color: #10b981; }
+  .tutorial-step.current { opacity: 1; color: #f59e0b; font-weight: 600; }
+  footer { text-align: center; padding: 2rem 0; color: #64748b; font-size: 0.8rem; border-top: 1px solid #1e293b; margin-top: 2rem; }
+  @media (max-width: 700px) { .grid { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<header>
+  <h1>📈 TradeGame</h1>
+  <p class="tagline">Paper trading simulator — practice, replay, learn. Zero real money.</p>
+</header>
+
+<div class="tutorial-overlay" id="tutorial">
+  <h3>🎓 Quick Tutorial</h3>
+  <div class="tutorial-step current" id="tut-1">1. Choose a market (Crypto, Stocks, Forex) above</div>
+  <div class="tutorial-step" id="tut-2">2. Browse available securities and their prices</div>
+  <div class="tutorial-step" id="tut-3">3. Buy shares when you think price will go up</div>
+  <div class="tutorial-step" id="tut-4">4. Watch your P&L update in real time</div>
+  <div class="tutorial-step" id="tut-5">5. Set SL/TP to protect your account</div>
+  <div class="tutorial-step" id="tut-6">6. Try a scenario for guided practice</div>
+</div>
+
+<div class="balance">💰 Cash: <span id="cash">10000.00</span></div>
+<div class="metric"><span class="metric-label">Portfolio Value</span><div class="metric-value" id="portfolio-value">$10,000.00</div></div>
+<div class="metric"><span class="metric-label">Day</span><div class="metric-value" id="day">1</div></div>
+<div class="metric"><span class="metric-label">P&L</span><div class="metric-value" id="total-pnl" style="color:#94a3b8;">$0.00</div></div>
+<div style="margin: 0.75rem 0;"><button onclick="advanceDay()">⏭ Advance Day</button> <button onclick="resetGame()" style="background:#475569;">🔄 Reset</button> <button onclick="toggleTeachMode()" style="background:#475569;">🎓 Teach: $1,000 Mode</button></div>
+
+<div class="mode-tabs">
+  <div class="tab active" onclick="switchTab('trade', this)">💱 Trade</div>
+  <div class="tab" onclick="switchTab('scenarios', this)">📖 Scenarios</div>
+  <div class="tab" onclick="switchTab('portfolio', this)">📊 Portfolio</div>
+  <div class="tab" onclick="switchTab('journal', this)">📝 Journal</div>
+</div>
+
+<div class="panel active" id="panel-trade">
+  <div class="grid">
+    <div>
+      <label for="market-select">Market</label>
+      <select id="market-select" onchange="updateMarket()">
+        <option value="crypto">🟡 Crypto</option>
+        <option value="stocks">🔵 Stocks</option>
+        <option value="forex">🟢 Forex</option>
+      </select>
+      <div class="portfolio" id="securities-list"></div>
+    </div>
+    <div>
+      <label>Buy</label>
+      <input type="text" id="buy-symbol" placeholder="Symbol (e.g., BTC, AAPL, EUR/USD)">
+      <input type="number" id="buy-amount" placeholder="Quantity" min="1" step="1">
+      <label style="margin-top:0.5rem; font-size:0.8rem;">Stop Loss % (below entry)</label>
+      <input type="number" id="buy-sl" placeholder="e.g., 5" min="0" step="0.5">
+      <label style="font-size:0.8rem;">Take Profit % (above entry)</label>
+      <input type="number" id="buy-tp" placeholder="e.g., 10" min="0" step="0.5">
+      <button onclick="buy()">🛒 Buy</button>
+      <div id="risk-calc" style="background:#0f172a; border-radius:6px; padding:0.75rem; font-size:0.85rem; margin-top:0.75rem; border-left:3px solid #ef4444;">
+        <strong>⚠️ Risk Preview</strong><br>
+        <span id="risk-text" style="color:#94a3b8;">Enter size & SL % to see risk</span>
+      </div>
+      <hr style="border-color:#334155; margin: 1rem 0;">
+      <label>Sell</label>
+      <input type="text" id="sell-symbol" placeholder="Symbol">
+      <input type="number" id="sell-amount" placeholder="Quantity" min="1" step="1">
+      <button class="sell" onclick="sell()">💸 Sell</button>
+      <div class="chart-area" id="mini-chart"><canvas id="chart-canvas"></canvas></div>
+    </div>
+  </div>
+</div>
+
+<div class="panel" id="panel-scenarios">
+  <p style="color:#94a3b8; margin-bottom:1rem;">Educational scenarios — guided practice with historical moments.</p>
+  <div id="scenarios-list"></div>
+</div>
+
+<div class="panel" id="panel-portfolio">
+  <h3 style="margin-top:0;">Positions</h3>
+  <div class="positions" id="positions-list">
+    <p style="color:#64748b;">No positions yet. Start trading!</p>
+  </div>
+  <h3>Recent Trades</h3>
+  <div class="log" id="trade-log">
+    <div class="log-entry info">Welcome to TradeGame. Start by switching markets and buying.</div>
+  </div>
+</div>
+
+<div class="panel" id="panel-journal">
+  <h3 style="margin-top:0;">Trading Journal</h3>
+  <textarea id="journal-entry" placeholder="What did you learn today? What's your plan?" style="width:100%; min-height:120px; background:#0f172a; border:1px solid #334155; border-radius:6px; color:#e2e8f0; padding:0.75rem; font-family:inherit; resize:vertical;"></textarea>
+  <div style="margin-top:0.75rem;"><button onclick="saveJournal()">💾 Save Journal Entry</button></div>
+  <div class="log" id="journal-entries" style="margin-top:1rem;"></div>
+</div>
+
+<footer>
+  TradeGame is education only, not financial advice. No real money. Privacy-safe (local storage only). © 2026 JimmyTheHat
+</footer>
+
+<script>
+const SECURITIES = {
+  crypto: [
+    { symbol: 'BTC', name: 'Bitcoin', basePrice: 65000, volatility: 0.06 },
+    { symbol: 'ETH', name: 'Ethereum', basePrice: 3200, volatility: 0.07 },
+    { symbol: 'SOL', name: 'Solana', basePrice: 145, volatility: 0.09 },
+    { symbol: 'DOGE', name: 'Dogecoin', basePrice: 0.12, volatility: 0.12 },
+    { symbol: 'LTC', name: 'Litecoin', basePrice: 85, volatility: 0.05 },
+  ],
+  stocks: [
+    { symbol: 'AAPL', name: 'Apple Inc.', basePrice: 195, volatility: 0.025 },
+    { symbol: 'NVDA', name: 'NVIDIA Corp.', basePrice: 875, volatility: 0.04 },
+    { symbol: 'TSLA', name: 'Tesla Inc.', basePrice: 245, volatility: 0.055 },
+    { symbol: 'MSFT', name: 'Microsoft', basePrice: 415, volatility: 0.02 },
+    { symbol: 'AMZN', name: 'Amazon', basePrice: 185, volatility: 0.03 },
+  ],
+  forex: [
+    { symbol: 'EUR/USD', name: 'Euro / US Dollar', basePrice: 1.0850, volatility: 0.004, pip: true },
+    { symbol: 'GBP/USD', name: 'British Pound / US Dollar', basePrice: 1.2750, volatility: 0.005, pip: true },
+    { symbol: 'USD/JPY', name: 'US Dollar / Japanese Yen', basePrice: 154.50, volatility: 0.004, pip: true },
+    { symbol: 'USD/CAD', name: 'US Dollar / Canadian Dollar', basePrice: 1.3650, volatility: 0.004, pip: true },
+  ],
+};
+
+const SCENARIOS = [
+  { id: 1, title: 'The 2022 Crypto Winter', market: 'crypto', desc: 'Bitcoin crashed from $69k to $15k. How would you have hedged?', difficulty: 'Intermediate', setup: { BTC: { base: 45000, bias: -0.7 } } },
+  { id: 2, title: 'NVDA AI Boom 2023', market: 'stocks', desc: 'AI hype drove NVDA up 200%+ in months. Ride or time the peak?', difficulty: 'Intermediate', setup: { NVDA: { base: 380, bias: 0.8 } } },
+  { id: 3, title: 'Brexit Vote Volatility', market: 'forex', desc: 'GBP/USD swung wildly on referendum results. Risk management critical.', difficulty: 'Advanced', setup: { 'GBP/USD': { base: 1.45, bias: -0.15 } } },
+  { id: 4, title: 'First Trade Practice', market: 'crypto', desc: 'Learn the basics. Buy a little BTC, watch what happens.', difficulty: 'Beginner', setup: {} },
+  { id: 5, title: 'HODL vs Day Trade', market: 'crypto', desc: 'Compare passive hold vs active trading on ETH.', difficulty: 'Intermediate', setup: { ETH: { base: 1800, bias: 0 } } },
+  { id: 6, title: 'GameStop Short Squeeze', market: 'stocks', desc: 'Retail traders drove GME up 1,500%+. Could you have timed the exit?', difficulty: 'Advanced', setup: { GME: { base: 25, bias: 0.0 } }, extraSecurities: [{ symbol: 'GME', name: 'GameStop Corp.', basePrice: 25, volatility: 0.35 }] },
+  { id: 7, title: 'Dollar Strength Cycle', market: 'forex', desc: 'USD strengthened as Fed hiked rates. Can you trade the trend?', difficulty: 'Intermediate', setup: { 'EUR/USD': { base: 1.08, bias: -0.08 } } },
+  { id: 8, title: 'ETH Merge Play', market: 'crypto', desc: 'Ethereum merged to PoS. Buy the rumor, sell the news?', difficulty: 'Beginner', setup: { ETH: { base: 1900, bias: 0.12 } } },
+  { id: 9, title: 'Black Monday Replay', market: 'stocks', desc: 'Market drops 22% in one day. Do you panic sell or hold?', difficulty: 'Advanced', setup: { SPY: { base: 420, bias: -0.22 } }, extraSecurities: [{ symbol: 'SPY', name: 'S&P 500 ETF', basePrice: 420, volatility: 0.12 }] },
+  { id: 10, title: 'Japanese Yen Carry Trade', market: 'forex', desc: 'Low-rate JPY funded high-yield trades. What breaks when rates shift?', difficulty: 'Advanced', setup: { 'USD/JPY': { base: 145, bias: 0.06 } } },
+  { id: 11, title: 'The Constant Trader', market: 'crypto', desc: 'Buy and hold BTC. See how compounding compares to active trading over time.', difficulty: 'Beginner', setup: { BTC: { base: 40000, bias: 0.05 } } },
+  { id: 12, title: 'Earnings Season Volatility', market: 'stocks', desc: 'AAPL reports earnings. IV spikes, then collapses. Trade the event.', difficulty: 'Intermediate', setup: { AAPL: { base: 175, bias: 0.04 } } },
+];
+
+let state = {
+  cash: 10000,
+  day: 1,
+  positions: {},
+  prices: {},
+  history: [],
+  journalEntries: [],
+  currentMarket: 'crypto',
+  activeScenario: null,
+  teachMode: false,
+  progression: {
+    streak: 0,
+    lastDay: 0,
+    badges: [],
+    totalTrades: 0,
+    slHitCount: 0,
+    tpHitCount: 0,
+    scenariosCompleted: [],
+  },
+};
+
+function loadState() {
+  const saved = localStorage.getItem('tradegame_state');
+  if (saved) {
+    try {
+      const parsed = JSON.parse(saved);
+      state = { ...state, ...parsed };
+    } catch(e) {}
+  }
+}
+
+function saveState() {
+  localStorage.setItem('tradegame_state', JSON.stringify(state));
+}
+
+function initPrices() {
+  for (const [market, secs] of Object.entries(SECURITIES)) {
+    state.prices[market] = {};
+    for (const s of secs) {
+      if (state.activeScenario && state.activeScenario.setup[s.symbol]) {
+        const setup = state.activeScenario.setup[s.symbol];
+        state.prices[market][s.symbol] = setup.base * (1 + (Math.random() - 0.5) * 0.1);
+      } else {
+        state.prices[market][s.symbol] = s.basePrice * (1 + (Math.random() - 0.5) * 0.05);
+      }
+    }
+  }
+}
+
+function randWalk(price, volatility) {
+  const drift = (Math.random() - 0.48) * volatility;
+  return price * (1 + drift);
+}
+
+function advanceDay() {
+  for (const [market, secs] of Object.entries(SECURITIES)) {
+    if (!state.prices[market]) state.prices[market] = {};
+    for (const s of secs) {
+      const current = state.prices[market][s.symbol] || s.basePrice;
+      const newPrice = randWalk(current, s.volatility / 30);
+      state.prices[market][s.symbol] = newPrice;
+      state.history.push({ day: state.day, symbol: s.symbol, price: newPrice });
+      if (state.history.length > 500) state.history.shift();
+    }
+  }
+  for (const [sym, pos] of Object.entries(state.positions)) {
+    if (!pos.qty || pos.qty <= 0) continue;
+    const market = pos.market;
+    const price = state.prices[market]?.[sym];
+    if (!price) continue;
+    let closed = false;
+    if (pos.slPercent !== null) {
+      const slPrice = pos.avgPrice * (1 - pos.slPercent / 100);
+      if (price <= slPrice) {
+        state.cash += price * pos.qty;
+        const profit = (price - pos.avgPrice) * pos.qty;
+        const pnlText = profit >= 0 ? `+$${profit.toFixed(2)}` : `-$${Math.abs(profit).toFixed(2)}`;
+        addLog(`🛑 Stop-loss hit: ${sym} @ $${formatPrice(price, market)} | P&L: ${pnlText}`, 'sell');
+        delete state.positions[sym];
+        closed = true;
+      }
+    }
+    if (!closed && pos.tpPercent !== null) {
+      const tpPrice = pos.avgPrice * (1 + pos.tpPercent / 100);
+      if (price >= tpPrice) {
+        state.cash += price * pos.qty;
+        const profit = (price - pos.avgPrice) * pos.qty;
+        const pnlText = profit >= 0 ? `+$${profit.toFixed(2)}` : `-$${Math.abs(profit).toFixed(2)}`;
+        addLog(`🎯 Take-profit hit: ${sym} @ $${formatPrice(price, market)} | P&L: ${pnlText}`, 'buy');
+        delete state.positions[sym];
+      }
+    }
+  }
+  state.day++;
+  saveState();
+  render();
+  updateTutorial();
+}
+
+function buy() {
+  const symbol = document.getElementById('buy-symbol').value.toUpperCase().trim();
+  const amount = parseInt(document.getElementById('buy-amount').value);
+  if (!symbol || !amount || amount <= 0) { alert('Enter a valid symbol and quantity'); return; }
+
+  const market = state.currentMarket;
+  const price = state.prices[market]?.[symbol] || SECURITIES[market]?.find(s => s.symbol === symbol)?.basePrice;
+  if (!price) { alert(`Symbol "${symbol}" not found in ${market}`); return; }
+
+  const cost = price * amount;
+  if (cost > state.cash) { alert(`Insufficient funds. Cost: $${cost.toFixed(2)}, Cash: $${state.cash.toFixed(2)}`); return; }
+
+  state.cash -= cost;
+  if (!state.positions[symbol]) state.positions[symbol] = { qty: 0, avgPrice: 0, market, slPercent: null, tpPercent: null };
+  const pos = state.positions[symbol];
+  const newTotal = pos.qty + amount;
+  pos.avgPrice = (pos.qty * pos.avgPrice + amount * price) / newTotal;
+  pos.qty = newTotal;
+  const slVal = parseFloat(document.getElementById('buy-sl').value);
+  const tpVal = parseFloat(document.getElementById('buy-tp').value);
+  pos.slPercent = (!isNaN(slVal) && slVal > 0) ? slVal : null;
+  pos.tpPercent = (!isNaN(tpVal) && tpVal > 0) ? tpVal : null;
+  document.getElementById('buy-sl').value = '';
+  document.getElementById('buy-tp').value = '';
+
+  addLog(`Bought ${amount} ${symbol} @ $${formatPrice(price, market)} = $${formatPrice(cost, market)}`, 'buy');
+  document.getElementById('buy-symbol').value = '';
+  document.getElementById('buy-amount').value = '';
+  if (state.progression) state.progression.totalTrades++;
+  checkBadges();
+  saveState();
+  render();
+}
+
+function sell() {
+  const symbol = document.getElementById('sell-symbol').value.toUpperCase().trim();
+  const amount = parseInt(document.getElementById('sell-amount').value);
+  if (!symbol || !amount || amount <= 0) { alert('Enter a valid symbol and quantity'); return; }
+
+  const pos = state.positions[symbol];
+  if (!pos || pos.qty < amount) { alert(`Insufficient position. You own ${pos?.qty || 0} ${symbol}`); return; }
+
+  const market = pos.market || state.currentMarket;
+  const price = state.prices[market]?.[symbol] || SECURITIES[market]?.find(s => s.symbol === symbol)?.basePrice;
+  const revenue = price * amount;
+  const profit = (price - pos.avgPrice) * amount;
+
+  state.cash += revenue;
+  pos.qty -= amount;
+  if (pos.qty === 0) delete state.positions[symbol];
+
+  const pnl = profit >= 0 ? `+$${formatPrice(profit, market)}` : `-$${formatPrice(Math.abs(profit), market)}`;
+  addLog(`Sold ${amount} ${symbol} @ $${formatPrice(price, market)} | P&L: ${pnl}`, 'sell');
+  document.getElementById('sell-symbol').value = '';
+  document.getElementById('sell-amount').value = '';
+  if (state.progression) state.progression.totalTrades++;
+  checkBadges();
+  saveState();
+  render();
+}
+
+function formatPrice(n, market = 'stocks') {
+  const forexSym = ['EUR/USD','GBP/USD','USD/JPY','USD/CAD'];
+  if (forexSym.includes(n?.symbol)) return n.toFixed(4);
+  if (market === 'forex') return n.toFixed(4);
+  if (n < 1) return n.toFixed(4);
+  if (n < 100) return n.toFixed(2);
+  return n.toFixed(2);
+}
+
+function addLog(msg, type) {
+  const log = document.getElementById('trade-log');
+  const entry = document.createElement('div');
+  entry.className = `log-entry ${type}`;
+  entry.textContent = `Day ${state.day}: ${msg}`;
+  log.insertBefore(entry, log.firstChild);
+}
+
+function switchTab(tab, el) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById(`panel-${tab}`).classList.add('active');
+}
+
+function updateMarket() {
+  state.currentMarket = document.getElementById('market-select').value;
+  render();
+  updateTutorial();
+  updateRiskCalc();
+}
+
+function render() {
+  document.getElementById('cash').textContent = `$${state.cash.toFixed(2)}`;
+  document.getElementById('day').textContent = state.day;
+  renderSecurities();
+  renderPositions();
+  renderScenarios();
+  updatePortfolioValue();
+  updatePnL();
+  renderJournal();
+  drawChart();
+}
+
+function renderSecurities() {
+  const container = document.getElementById('securities-list');
+  const market = state.currentMarket;
+  const secs = SECURITIES[market];
+  container.innerHTML = '';
+  const typeClass = { crypto: 'crypto', stocks: '', forex: 'forex' }[market];
+  for (const s of secs) {
+    const price = state.prices[market]?.[s.symbol] || s.basePrice;
+    const open = s.basePrice;
+    const change = ((price - open) / open * 100);
+    const changeClass = change >= 0 ? 'up' : 'down';
+    const sign = change >= 0 ? '+' : '';
+    container.innerHTML += `
+      <div class="stock-card ${typeClass}" onclick="autoFillSymbol('${s.symbol}')">
+        <div class="card-title">${s.symbol} — ${s.name}</div>
+        <div class="card-price">${formatPrice(price, market === 'forex' ? 'forex' : market)}</div>
+        <div class="card-change ${changeClass}">${sign}${change.toFixed(2)}%</div>
+      </div>`;
+  }
+}
+
+function autoFillSymbol(sym) {
+  document.getElementById('buy-symbol').value = sym;
+  document.getElementById('buy-symbol').focus();
+  updateRiskCalc();
+}
+
+function renderPositions() {
+  const container = document.getElementById('positions-list');
+  const positions = Object.entries(state.positions);
+  if (positions.length === 0) {
+    container.innerHTML = '<p style="color:#64748b;">No positions yet. Start trading!</p>';
+    return;
+  }
+  container.innerHTML = '';
+  let totalEquity = 0;
+  for (const [sym, pos] of positions) {
+    const market = pos.market || state.currentMarket;
+    const price = state.prices[market]?.[sym] || SECURITIES[market]?.find(s => s.symbol === sym)?.basePrice || pos.avgPrice;
+    const equity = price * pos.qty;
+    const pnl = (price - pos.avgPrice) * pos.qty;
+    totalEquity += equity;
+    const pnlClass = pnl >= 0 ? 'up' : 'down';
+    const pnlText = pnl >= 0 ? `+$${formatPrice(pnl, market)}` : `-$${formatPrice(Math.abs(pnl), market)}`;
+    container.innerHTML += `
+      <div class="position">
+        <div class="position-info">
+          <div class="pos-symbol">${sym}</div>
+          <div class="pos-detail">${pos.qty} shares @ $${formatPrice(pos.avgPrice, market)} avg${pos.slPercent ? `<br>🛑 SL: ${pos.slPercent}%` : ''}${pos.tpPercent ? `<br>🎯 TP: ${pos.tpPercent}%` : ''}</div>
+        </div>
+        <div class="pos-pnl ${pnlClass}">${pnlText}</div>
+      </div>`;
+  }
+}
+
+function renderScenarios() {
+  const container = document.getElementById('scenarios-list');
+  container.innerHTML = '';
+  for (const sc of SCENARIOS) {
+    const selected = state.activeScenario?.id === sc.id ? 'selected' : '';
+    container.innerHTML += `
+      <div class="scenario-card ${selected}" onclick="selectScenario(${sc.id})">
+        <div class="scenario-title">${sc.title}</div>
+        <div class="scenario-desc">${sc.desc}</div>
+        <div class="scenario-market">${sc.market} · ${sc.difficulty}</div>
+      </div>`;
+  }
+}
+
+function selectScenario(id) {
+  const sc = SCENARIOS.find(s => s.id === id);
+  if (!sc) return;
+  state.activeScenario = sc;
+  state.cash = 10000;
+  state.positions = {};
+  state.day = 1;
+  state.history = [];
+  if (sc.extraSecurities && sc.market) {
+    const existing = SECURITIES[sc.market] || [];
+    for (const extra of sc.extraSecurities) {
+      if (!existing.some(s => s.symbol === extra.symbol)) {
+        existing.push(extra);
+      }
+    }
+    SECURITIES[sc.market] = existing;
+  }
+  initPrices();
+  saveState();
+  render();
+  addLog(`Loaded scenario: ${sc.title}`, 'info');
+}
+
+function loadScenario() {
+  if (state.activeScenario) initPrices();
+  else initPrices();
+}
+
+function updatePortfolioValue() {
+  let equity = state.cash;
+  for (const [sym, pos] of Object.entries(state.positions)) {
+    const market = pos.market || state.currentMarket;
+    const price = state.prices[market]?.[sym] || SECURITIES[market]?.find(s => s.symbol === sym)?.basePrice || pos.avgPrice;
+    equity += price * pos.qty;
+  }
+  document.getElementById('portfolio-value').textContent = `$${equity.toFixed(2)}`;
+}
+
+function updatePnL() {
+  let cost = 0, value = 0;
+  for (const [sym, pos] of Object.entries(state.positions)) {
+    const market = pos.market || state.currentMarket;
+    const price = state.prices[market]?.[sym] || SECURITIES[market]?.find(s => s.symbol === sym)?.basePrice || pos.avgPrice;
+    cost += pos.avgPrice * pos.qty;
+    value += price * pos.qty;
+  }
+  const pnl = value - cost;
+  const el = document.getElementById('total-pnl');
+  el.textContent = pnl >= 0 ? `+$${pnl.toFixed(2)}` : `-$${Math.abs(pnl).toFixed(2)}`;
+  el.style.color = pnl >= 0 ? '#10b981' : '#ef4444';
+}
+
+function renderJournal() {
+  const container = document.getElementById('journal-entries');
+  if (state.journalEntries.length === 0) { container.innerHTML = '<p style="color:#64748b;">No journal entries yet.</p>'; return; }
+  container.innerHTML = state.journalEntries.slice().reverse().map(e =>
+    `<div class="log-entry"><strong>Day ${e.day}:</strong> ${e.text}</div>`
+  ).join('');
+}
+
+function saveJournal() {
+  const text = document.getElementById('journal-entry').value.trim();
+  if (!text) return;
+  state.journalEntries.push({ day: state.day, text });
+  document.getElementById('journal-entry').value = '';
+  saveState();
+  render();
+}
+
+function toggleTeachMode() {
+  if (confirm('Switch to Teaching Mode ($1,000)? Learn how small accounts need strict risk limits.')) {
+    state.cash = 1000;
+    state.positions = {};
+    state.day = 1;
+    state.history = [];
+    state.teachMode = !state.teachMode;
+    initPrices();
+    saveState();
+    render();
+    addLog('🎓 Teaching mode: $1,000 balance. risking >2% per trade can blow your account.', 'info');
+  }
+}
+
+function resetGame() {
+  if (confirm('Reset all progress? This cannot be undone.')) {
+    state = { cash: 10000, day: 1, positions: {}, prices: {}, history: [], journalEntries: [], currentMarket: state.currentMarket, activeScenario: state.activeScenario, teachMode: state.teachMode };
+    saveState();
+    render();
+  }
+}
+
+function drawChart() {
+  const canvas = document.getElementById('chart-canvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const rect = canvas.parentElement.getBoundingClientRect();
+  canvas.width = rect.width;
+  canvas.height = rect.height;
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  const market = state.currentMarket;
+  const primary = SECURITIES[market]?.[0];
+  if (!primary) return;
+  const sym = primary.symbol;
+  const history = state.history.filter(h => h.symbol === sym).slice(-50);
+  if (history.length < 2) return;
+
+  const prices = history.map(h => h.price);
+  const min = Math.min(...prices);
+  const max = Math.max(...prices);
+  const range = max - min || 1;
+  const w = canvas.width;
+  const h = canvas.height;
+  const step = w / (prices.length - 1);
+
+  ctx.beginPath();
+  ctx.strokeStyle = '#38bdf8';
+  ctx.lineWidth = 2;
+  for (let i = 0; i < prices.length; i++) {
+    const x = i * step;
+    const y = h - ((prices[i] - min) / range) * (h - 20) - 10;
+    if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+  }
+  ctx.stroke();
+}
+
+function updateTutorial() {
+  const steps = ['tut-1', 'tut-2', 'tut-3', 'tut-4', 'tut-5', 'tut-6'];
+  const market = state.currentMarket;
+  const marketName = { crypto: 'Crypto', stocks: 'Stocks', forex: 'Forex' }[market];
+  document.getElementById('tut-1').innerHTML = `1. ✅ Current market: <strong>${marketName}</strong>`;
+  document.getElementById('tut-1').className = 'tutorial-step done';
+  const hasSec = document.getElementById('securities-list').children.length > 0;
+  document.getElementById('tut-2').innerHTML = hasSec ? `2. ✅ ${SECURITIES[market].length} securities loaded` : '2. Browse available securities and prices';
+  document.getElementById('tut-2').className = hasSec ? 'tutorial-step done' : 'tutorial-step';
+  const hasOrders = Object.entries(state.positions).length > 0 || state.history.length > 0;
+  document.getElementById('tut-3').innerHTML = hasOrders ? '3. ✅ You have active trades' : '3. Buy shares when you think price will go up';
+  document.getElementById('tut-3').className = hasOrders ? 'tutorial-step done' : 'tutorial-step';
+  const done = steps.filter((_, i) => {
+    const el = document.getElementById(`tut-${i+1}`);
+    return el.className === 'tutorial-step done';
+  });
+  if (done.length >= 3) { document.getElementById('tut-4').className = 'tutorial-step done'; document.getElementById('tut-4').innerHTML = '4. ✅ P&L updates automatically'; }
+  const hasSLTP = Object.values(state.positions).some(p => p.slPercent || p.tpPercent);
+  document.getElementById('tut-5').innerHTML = hasSLTP ? '5. ✅ Stop-loss / Take-profit set' : '5. Set SL/TP to protect your account';
+  document.getElementById('tut-5').className = hasSLTP ? 'tutorial-step done' : 'tutorial-step';
+  const hasScenario = !!state.activeScenario;
+  document.getElementById('tut-6').innerHTML = hasScenario ? '6. ✅ Scenario loaded' : '6. Try a scenario for guided practice';
+  document.getElementById('tut-6').className = hasScenario ? 'tutorial-step done' : 'tutorial-step';
+}
+
+function updateRiskCalc() {
+  const symbol = document.getElementById('buy-symbol').value.trim();
+  const amount = parseInt(document.getElementById('buy-amount').value) || 0;
+  const sl = parseFloat(document.getElementById('buy-sl').value);
+  const market = state.currentMarket;
+  const price = state.prices[market]?.[symbol] || SECURITIES[market]?.find(s => s.symbol === symbol)?.basePrice || 0;
+  const el = document.getElementById('risk-text');
+  if (!symbol || !amount || !price || isNaN(sl) || sl <= 0) {
+    el.textContent = 'Enter size & SL % to see risk';
+    return;
+  }
+  const cost = price * amount;
+  const maxLoss = cost * (sl / 100);
+  let portfolio = state.cash;
+  for (const [_, p] of Object.entries(state.positions)) {
+    const mkt = p.market || market;
+    const pr = state.prices[mkt]?.[_];
+    portfolio += (pr || p.avgPrice) * p.qty;
+  }
+  const pct = portfolio > 0 ? (maxLoss / portfolio * 100).toFixed(2) : '0.00';
+  el.innerHTML = `Max loss if SL hits: <span style="color:#ef4444;">$${maxLoss.toFixed(2)}</span> (${pct}% of portfolio)`;
+}
+
+function checkBadges() {
+  if (!state.progression) return;
+  const b = state.progression.badges;
+  const add = (id) => { if (!b.includes(id)) { b.push(id); addLog(`🏅 Badge unlocked: ${id}`, 'info'); } };
+  if (state.progression.totalTrades >= 1) add('First Trade');
+  if (state.progression.totalTrades >= 5) add('5 Trades');
+  if (state.progression.totalTrades >= 10) add('10 Trades');
+  if (state.progression.totalTrades >= 25) add('Active Trader');
+  if (state.progression.totalTrades >= 50) add('Day Trader');
+  if (state.progression.totalTrades >= 100) add('Centurion');
+}
+
+['buy-symbol','buy-amount','buy-sl','buy-tp','market-select'].forEach(id => {
+  const el = document.getElementById(id);
+  if (el) el.addEventListener('input', updateRiskCalc);
+});
+
+function init() {
+  loadState();
+  if (Object.keys(state.prices).length === 0) initPrices();
+  render();
+  updateRiskCalc();
+}
+
+init();
+</script>
+</body>
+</html>
