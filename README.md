@@ -35,9 +35,14 @@ who trade, and an education video game in the making.
 
 ## Status
 
-✅ **Playable demo live!** Try it now at **[demo/index.html](demo/index.html)** —
-no account, no install, runs in your browser. Paper trading for crypto, stocks,
+✅ **Playable demo live!**
+
+### 🎮 [**PLAY NOW →**](https://subtiliorars-sys.github.io/TradeGame---Preview/)
+
+No account, no install, runs in your browser. Paper trading for crypto, stocks,
 and forex with educational scenarios.
+
+**Alternative:** Open [demo/index.html](demo/index.html) locally in your browser.
 
 ### Latest Features (2026-06-20)
 - 🛑 Stop-loss / Take-profit automation on every position
